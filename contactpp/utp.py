@@ -132,7 +132,8 @@ class UTPGenerator(object):
     def _run_optimizer(self):
         new_coeffs = fmin(self._make_objective_func(),
                 self.init_coeffs,
-                callback=self._make_callback_func())
+                callback=self._make_callback_func(),
+                disp=self.verbose)
         return new_coeffs
 
     def make_pseudopotential(self):
