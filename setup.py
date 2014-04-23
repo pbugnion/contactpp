@@ -136,7 +136,8 @@ def setup_package():
             long_description=LONG_DESCRIPTION,
             scripts=["bin/gen_pseudo",
                 "bin/gen_pseudo_troullier",
-                "bin/gen_pseudo_utp"],
+                "bin/gen_pseudo_utp",
+                "bin/gen_pseudo_swell"],
             classifiers=[
                 'Intended Audience :: Science/Research',
                 'Intended Audience :: Developers',

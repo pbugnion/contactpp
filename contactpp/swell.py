@@ -38,42 +38,60 @@ class _SquareWellBaseGenerator(object):
 
     def __init__(self,a,c):
         self.a = a
-        self.c = c if c is not None else self.calc_c()
+        self.c = c # value or None
         self._check_inputs()
         
-    def calc_c(self):
-        raise NotImplementedError(
-                "The well radius must be specified explicitly.")
-
     def make_pseudopotential(self):
-        V = self._calc_V()
-        return SquareWellPotential(V,self.c)
+        if self.c is None:
+            R = self._calc_V_R()
+        else:
+            R = self.c
+        V = self._calc_V_from_R(R)
+        return SquareWellPotential(V,R)
 
 
 class TopHatGenerator(_SquareWellBaseGenerator):
 
-    def _calc_gamma(self,V):
-        return self.c*np.sqrt(V)
+    def _calc_gamma(self,R,V):
+        return R*np.sqrt(V)
 
     def _check_inputs(self):
-        if self.a >= self.c:
-            raise ValueError("Cannot generate a top hat potential for \
+        if self.c is not None:
+            if self.a >= self.c:
+                raise ValueError("Cannot generate a top hat potential for \
 scattering lengths a > c, where c is the top hat radius.")
         if self.a < 0.:
             raise ValueError("Scattering length a <= 0.")
 
-    def _calc_a(self,V):
-        g = self._calc_gamma(V)
+    def _calc_a(self,R,V):
+        g = self._calc_gamma(R,V)
         if g<1e-8:
             # Use Taylor expansion
-            return self.c*((g**2)/3. - (g**4)*2./15. + (g**6)*17./315.)
+            return R*((g**2)/3. - (g**4)*2./15. + (g**6)*17./315.)
         else:
-            return self.c*(1.-np.tanh(g)/g)
+            return R*(1.-np.tanh(g)/g)
 
-    def _calc_V(self):
-        f = lambda V: self._calc_a(V)-self.a
+    def _calc_reff(self,R,V):
+        g = self._calc_gamma(R,V)
+        return R* ( 1 + (3*np.tanh(g)-g*(3+g**2) )/(3*g*(g - np.tanh(g))**2))
+
+    def _calc_V_from_R(self,R):
+        f = lambda V: self._calc_a(R,V)-self.a
         xlow, xhigh = bracket_root(f, 0.) 
         return brentq(f,xlow,xhigh)
+
+    def _calc_V_R(self):
+        """
+        Calculate V and R such that the potential has zero effective range.
+        """
+        def objective_func(R):
+            V = self._calc_V_from_R(R)
+            reff = self._calc_reff(R,V)
+            return reff
+        Rlow, Rhigh = bracket_root(
+                objective_func,1.001*self.a,init_step=1e-3)
+        R = brentq(objective_func,Rlow,Rhigh)
+        return R
 
 
 class SquareWellGenerator(_SquareWellBaseGenerator):
@@ -158,7 +176,7 @@ def bracket_root(f,xstart,direction=1,xmax=None,init_step=0.1,step_ratio=1.3):
             xhigh = xmax
         flow = f(xlow)
         fhigh = f(xhigh)
-        if xhigh == xmax and flow*fhigh > 0.:
+        if xhigh == xmax and flow*fhigh >= 0.:
             raise RuntimeError(
                     "Failed to find a root between {} and {}.".format(
                         xlow,xhigh))
@@ -185,7 +203,7 @@ def make_square_well_potential(scattering_length, radius):
 
     SquareWellPotential
     """
-    if radius <= 0.:
+    if radius is not None and radius <= 0.:
         raise ValueError("Well radius must be positive.")
     if scattering_length > 0.:
         gen = TopHatGenerator(scattering_length, radius)

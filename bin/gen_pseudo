@@ -36,9 +36,11 @@ if __name__ == '__main__':
             exit(call(["gen_pseudo","--help"]))
         
     elif typ == "troullier":
-        exit(call(["gen_pseudo_troullier"]  + args))
+        exit(call(["gen_pseudo_troullier"] + args))
     elif typ == "utp":
         exit(call(["gen_pseudo_utp"] + args))
+    elif typ == "swell":
+        exit(call(["gen_pseudo_swell"] + args))
     
     else:
         print >> sys.stderr, \

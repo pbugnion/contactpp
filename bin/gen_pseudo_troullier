@@ -2,9 +2,9 @@
 
 """
 Usage:
-    gen_pseudo troullier [--cutoff=<cutoff>] [options] repulsive <a> <E> 
-    gen_pseudo troullier [options] attractive <a> <E> <cutoff>
-    gen_pseudo troullier [options] bound <a> <cutoff>
+    gen_pseudo_troullier [--cutoff=<cutoff>] repulsive <a> <E> 
+    gen_pseudo_troullier attractive <a> <E> <cutoff>
+    gen_pseudo_troullier bound <a> <cutoff>
 
 Arguments:
     a    Scattering length.
