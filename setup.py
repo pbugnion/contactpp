@@ -134,7 +134,9 @@ def setup_package():
             url=URL,
             version=VERSION,
             long_description=LONG_DESCRIPTION,
-            scripts=["bin/gen_pseudo"],
+            scripts=["bin/gen_pseudo",
+                "bin/gen_pseudo_troullier",
+                "bin/gen_pseudo_utp"],
             classifiers=[
                 'Intended Audience :: Science/Research',
                 'Intended Audience :: Developers',

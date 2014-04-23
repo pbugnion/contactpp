@@ -1,88 +1,47 @@
 #!/usr/bin/env python
 
-""" 
-Usage: 
-    gen_pseudo [--cutoff=<cutoff>] [options] repulsive <a> <EF> 
-    gen_pseudo [options] attractive <a> <EF> <cutoff>
-    gen_pseudo [options] bound <a> <cutoff>
+"""
+Usage:
+    gen_pseudo <type> [<args> ...]
 
-Options:
-    -c <cutoff>, --cutoff=<cutoff>  pseudopotential cutoff (only optional
-                                    for the repulsive branch).
-    -v, --verbose                   Add debugging information
+The allowed values of <type> are:
+    troullier    Generate a Troullier-Martins type pseudopotential.
+    utp          Generate an 'ultratransferable' pseudopotential.
+    swell        Generate a square well/top hat pseudopotential.
 
-See "gen_pseudo help <branch>" for information on 
-arguments to a specific branch.
+See 'gen_pseudo help <type>' for more information on a specific type.
+
+This script produces output suitable for inclusion in a CASINO input
+file.
 """
 
 from docopt import docopt
+from subprocess import call
+import sys
 
-from contactpp import make_troullier_potential
-from contactpp.outputs import print_for_casino
+if __name__ == '__main__':
+    arg_dict = docopt(__doc__,options_first=True)
 
+    typ = arg_dict["<type>"]
+    args = arg_dict["<args>"]
 
-def validate_args_repulsive(**argv):
-    a = float(argv["<a>"])
-    Ef = float(argv["<EF>"])
-    cutoff = argv["--cutoff"]
-    if a <= 0.:
-        raise ValueError("Scattering length <a> should be > 0.")
-    if Ef <= 0.:
-        raise ValueError("Ef should be > 0.")
-    if cutoff is not None:
-        cutoff = float(cutoff)
-        if cutoff <= 0.:
-            raise ValueError("Cutoff should be >= 0.")
-    return a, Ef, cutoff
-
-def validate_args_attractive(**argv):
-    a = float(argv["<a>"])
-    Ef = float(argv["<EF>"])
-    cutoff = float(argv["<cutoff>"])
-    if a >= 0.:
-        raise ValueError("Scattering length <a> should be < 0.")
-    if Ef <= 0.:
-        raise ValueError("Ef should be > 0.")
-    if cutoff <= 0.:
-        raise ValueError("Cutoff must be > 0.")
-    return a, Ef, cutoff
-
-def validate_args_bound(**argv):
-    a = float(argv["<a>"])
-    cutoff = float(argv["<cutoff>"])
-    if a <= 0.:
-        raise ValueError("Scattering length <a> should be > 0.")
-    if cutoff <= 0.:
-        raise ValueError("Cutoff should be > 0.")
-    return a, cutoff
-
-
-def gen_pseudo_repulsive(**argv):
-    a, Ef, cutoff = validate_args_repulsive(**argv)
-    ppot = make_troullier_potential("repulsive",a,Ef,cutoff)
-    print_for_casino(ppot)
-
-def gen_pseudo_attractive(**argv):
-    a, Ef, cutoff = validate_args_attractive(**argv)
-    ppot = make_troullier_potential("attractive",a,Ef,cutoff)
-    print_for_casino(ppot)
-
-def gen_pseudo_bound(**argv):
-    a, cutoff = validate_args_bound(**argv)
-    ppot = make_troullier_potential("bound", a, cutoff=cutoff)
-    print_for_casino(ppot)
-
-
-if __name__ == "__main__":
-
-    args = docopt(__doc__,options_first=True)
-    if args["--verbose"]:
-        print args
-
-    if args["repulsive"]:
-        gen_pseudo_repulsive(**args)
-    if args["attractive"]: 
-        gen_pseudo_attractive(**args)
-    if args["bound"]:
-        gen_pseudo_bound(**args)
+    if typ == "help":
+        if "troullier" in args:
+            exit(call(["gen_pseudo_troullier","--help"]))
+        elif "utp" in args:
+            exit(call(["gen_pseudo_utp","--help"]))
+        elif "swell" in args:
+            exit(call(["gen_pseudo_swell","--help"]))
+        else:
+            exit(call(["gen_pseudo","--help"]))
+        
+    elif typ == "troullier":
+        exit(call(["gen_pseudo_troullier"]  + args))
+    elif typ == "utp":
+        exit(call(["gen_pseudo_utp"] + args))
+    
+    else:
+        print >> sys.stderr, \
+                "{} is not a valid type. See 'gen_pseudo help'.".format(typ)
+        exit()
 
