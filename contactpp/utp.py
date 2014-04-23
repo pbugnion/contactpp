@@ -87,7 +87,6 @@ class UTPGenerator(object):
         tandeltas = np.array([ self._calc_tandelta(V,k) for k in self.ks ])
         true_tandeltas = np.array([ self._calc_true_tandelta(k)
             for k in self.ks ])
-        # multiply by dos?
         return np.sqrt(sum(
             (true_tandeltas-tandeltas)**2 * self.dos(self.ks)))/len(self.ks)
 
