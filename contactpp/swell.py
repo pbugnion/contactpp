@@ -96,25 +96,25 @@ scattering lengths a > c, where c is the top hat radius.")
 
 class SquareWellGenerator(_SquareWellBaseGenerator):
 
-    def _calc_gamma(self,V):
-        return self.c*np.sqrt(abs(V))
+    def _calc_gamma(self,R,V):
+        return R*np.sqrt(abs(V))
 
     def _check_inputs(self):
         if self.a > 0.:
             raise ValueError("Scattering length a >= 0.")
 
-    def _calc_a(self,V):
-        g = self._calc_gamma(V)
+    def _calc_a(self,R,V):
+        g = self._calc_gamma(R,V)
         if g < 1e-8:
             # Use Taylor expansion
-            return -self.c*((g**2)/3. + (g**4)*2./15. +(g**6)*17./315.)
+            return -R*((g**2)/3. + (g**4)*2./15. +(g**6)*17./315.)
         else:
-            return self.c*(1.-np.tan(g)/g)
+            return R*(1.-np.tan(g)/g)
 
-    def _calc_V(self):
-        f = lambda V: self._calc_a(V) - self.a
+    def _calc_V_from_R(self,R):
+        f = lambda V: self._calc_a(R,V) - self.a
         # bracket a root between V = 0. and V corresponds to first divergence of a.
-        xlow, xhigh = bracket_root(f,0.,direction=-1.,xmax=-np.pi**2/(4.*self.c**2)+1e-8)
+        xlow, xhigh = bracket_root(f,0.,direction=-1.,xmax=-np.pi**2/(4.*R**2)+1e-8)
         return brentq(f,xlow,xhigh)
 
 
