@@ -8,17 +8,17 @@ can readily be extended to output pseudopotentials in a different format.
 
 The command structure is::
 
-    $ gen_pseudo [options] (repulsive|attractive|bound) <a> [other arguments]
+    $ gen_pseudo <type> [<args> ... ]
 
-Options must always appear straight after the program name. A reminder of the
-arguments can be obtained by::
+where ``<type>`` is one of ``troullier``, ``utp`` or ``swell``. A description
+of the arguments for each pseudopotential can be obtained using::
 
-    $ gen_pseudo (-h|--help)
+    $ gen_pseudo help <type>
 
 The command will produce a ``manual_interactions`` block suitable for
-inclusion in the Casino input file::
+inclusion in the Casino input file. For instance::
     
-    $ gen_pseudo repulsive 1.0 1.0
+    $ gen_pseudo troullier repulsive 1.0 1.0
 
     %block manual_interaction
     polynomial
@@ -39,49 +39,110 @@ inclusion in the Casino input file::
     c_12 : 4.13182642699
     %endblock manual_interaction
 
-We look at the arguments for each branch in more detail.
+
+We look at the arguments for each type of potential in more detail.
+
+Troullier-Martins pseudopotentials
+----------------------------------
+
+To generate a pseudopotential following the Troullier-Martins form of
+pseudopotentials, use one of the following commands::
+
+    $ gen_pseudo troullier [--cutoff=<cutoff>] repulsive <a> <E>
+    $ gen_pseudo troullier attractive <a> <E> <cutoff>
+    $ gen_pseudo troullier bound <a> <cutoff>
+    
+We look at the arguments for each branch in detail.
 
 Repulsive branch
-----------------
+++++++++++++++++
 
 ::
 
-    $ gen_pseudo repulsive <a> <EF>
+    $ gen_pseudo troullier repulsive <a> <E>
 
-``<a>`` is the scattering length, ``<EF>`` is the Fermi energy. The cutoff is
+``<a>`` is the scattering length, ``<E>`` is the calibration energy. The cutoff is
 calculated by default as the value of the first antinode of the true
-wavefunction at incident energy ``EF``. This can be altered by passing the
+wavefunction at incident energy ``E``. This can be altered by passing the
 command line argument ``--cutoff=XX``::
 
-    $ gen_pseudo --cutoff=XX repulsive <a> <EF>
+    $ gen_pseudo --cutoff=XX repulsive <a> <E>
 
 Attractive branch
------------------
++++++++++++++++++
 
 ::
 
-    $ gen_pseudo attractive <a> <EF> <cutoff>
+    $ gen_pseudo troullier attractive <a> <E> <cutoff>
 
-``<a>`` is the scattering length, ``<EF>`` is the Fermi energy and
+``<a>`` is the scattering length, ``<E>`` is the Fermi energy and
 ``<cutoff>`` is the cutoff, which must be smaller than the first node of the
 wavefunction. 
 
 Bound state
------------
++++++++++++
 
 ::
 
-    $ gen_pseudo bound <a> <cutoff>
+    $ gen_pseudo troullier bound <a> <cutoff>
 
 ``<a>`` is the scattering length and ``<cutoff>`` is the cutoff, which must
 be smaller than the first node of the wavefunction.
+
+UTP pseudopotentials
+--------------------
+
+To generate a UTP, use one of::
+
+    $ gen_pseudo utp [options] [--cutoff=<cutoff>] repulsive <a> <E>
+    $ gen_pseudo utp [options] attractive <a> <E> <cutoff>
+
+The arguments are identical to those for the relevant branch of the
+Troullier-Martins potential. The optimizer will print convergence information
+as it runs. This can be suppressed by passing ``--quiet`` or ``-q`` as an
+option.
+
+Square well pseudopotential
+---------------------------
+
+To generate a square well or top hat pseudopotential, use::
+
+    $ gen_pseudo swell [--radius=<radius>] [--] <a>
+
+where ``<a>`` is the scattering length, and ``--radius`` is the potential
+radius. 
+
+For repulsive potentials, if the radius is unspecified, the code will create a
+pseudopotential with zero effective range. 
+
+For attractive potential, the radius must be specified. To indicate a negative
+scattering length, add a double dash ``--`` before the scattering length. For
+instance, to create a square well with scattering length -0.5, use::
+
+    $ gen_pseudo swell --radius=0.3 -- -0.5
+
 
 
 Python API
 ==========
 
-We expose a python API to make it easy to customise the output of ``contactpp`` or include it as part of other scripts. The following example
-plots the potential using matplotlib.
+We expose a python API to make it easy to customise the output of ``contactpp``
+or include it as part of other scripts. 
+
+Importing ``contactpp`` exposes three functions:
+
+ * ``contactpp.make_troullier_potential``
+
+ * ``contactpp.make_utp_potential``
+
+ * ``contactpp.make_square_well_potential``
+
+See the API description below for details on the arguments to each of these
+functions.
+
+Each function returns a pseudopotential object. As an example of how to use
+this object, we generate a Troullier-Martins pseudopotential and plot it using
+matplotlib.
 
 .. code-block:: python
 
@@ -93,28 +154,40 @@ plots the potential using matplotlib.
             "repulsive",scattering_length=1.0,calibration_energy=1.0)
 
     print pseudopotential.cutoff
-    # 1.4690133838031225
+    # 1.8637284049928018
 
     print pseudopotential.coefficients
-    # [ -6.68710073   0.          37.55502727   0.         -76.8391296
-    # 11.49862799  86.92275765 -14.73185194 -74.73166664  28.08376479
-    # 29.25773827 -21.98980638   4.13182643]
+    # numpy array of coefficients.
 
     rs = np.linspace(0.,2*pseudopotential.cutoff)
     plt.plot(rs, pseudopotential.V(rs))
     plt.show()
 
-Generating the pseudopotential
-------------------------------
+Generating the pseudopotentials
+-------------------------------
 
 .. module:: contactpp
 
 .. autofunction:: make_troullier_potential
 
+.. autofunction:: make_utp_potential
+
+.. autofunction:: make_square_well_potential
+
 Pseudopotential objects
 -----------------------
+
+.. module:: contactpp.troullier
 
 .. autoclass:: TroullierScatteringPotential
 
 .. autoclass:: TroullierBoundPotential
+
+.. module:: contactpp.utp
+
+.. autoclass:: UTPPotential
+
+.. module:: contactpp.swell
+
+.. autoclass:: SquareWellPotential
 
