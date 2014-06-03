@@ -5,11 +5,11 @@ contactpp
 =========
 
 contactpp is a package for the generation of pseudopotentials for the 
-contact interaction. The theory is outlined in [BNC]_. 
+contact interaction. The theory is outlined in [BLNC]_. 
 
 
-.. [BNC] P.O. Bugnion, R.J. Needs, and G.J. Conduit, 
-         High-fidelity contact pseudopotentials and p-wave superconductivity.
+.. [BLNC] P.O. Bugnion, P. López Ríos, R.J. Needs, and G.J. Conduit, 
+         High-fidelity pseudopotentials for the contact interaction.
 
 Links
 -----
