@@ -28,21 +28,29 @@ contactpp requires python2.7 and numpy.
 The easiest way to download and install ``contactpp`` is from the Python
 package index. Run::
 
-    $ python easy_install contactpp
+    $ easy_install contactpp
 
 This requires root access (unless you are running in a virtual environment).
 To install without root access, run::
 
-    $ python easy_install --user contactpp
+    $ easy_install --user contactpp
 
-To install from source, clone the git repository using::
+To install from github, clone the git repository using::
 
     $ git clone https://github.com/pbugnion/contactpp.git
 
 Navigate to the source's root directory (``contactpp``) and run::
 
     $ python setup.py install
+    
+You may need to run this as root.
 
+If you have a *.zip or a *tar.gz archive of the source, unpack the compressed archive into
+a directory, navigate to this directory and run::
+
+    $ python setup.py install
+
+You may need to run this as root.
 
 
 Issue reporting and contributing
