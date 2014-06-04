@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import os
 import sys
+import codecs
 
 DISTNAME = "contactpp"
 DESCRIPTION = "Pseudopotential generator for the contact interaction"
@@ -9,7 +10,7 @@ MAINTAINER_EMAIL = "pascal@bugnion.org"
 URL = "https://pypi.python.org/pypi/contactpp"
 LICENSE = "new BSD"
 
-LONG_DESCRIPTION = """
+LONG_DESCRIPTION = u"""
 
 contactpp
 =========
@@ -18,8 +19,8 @@ contactpp is a package for the generation of pseudopotentials for the
 contact interaction. The theory is outlined in [BNC]_. 
 
 
-.. [BNC] P.O. Bugnion, R.J. Needs, and G.J. Conduit, 
-         High-fidelity contact pseudopotentials and p-wave superconductivity.
+.. [BLNC] P.O. Bugnion, P. L\u00F3pez R\u00EDos, R.J. Needs, and G.J. Conduit, 
+         High-fidelity pseudopotentials for the contact interaction.
 
 Links
 -----
@@ -33,25 +34,34 @@ Links
 Installation
 ------------
 
-contactpp requires python2.7 and numpy. 
+contactpp requires python2.7, numpy and scipy. On Ubuntu, for instance,
+these can be installed with:
+
+    $ sudo apt-get install python-numpy python-scipy
 
 The easiest way to download and install ``contactpp`` is from the Python
 package index. Run::
 
-    $ python easy_install contactpp
+    $ easy_install contactpp
 
 This requires root access (unless you are running in a virtual environment).
 To install without root access, run::
 
-    $ python easy_install --user contactpp
+    $ easy_install --user contactpp
 
-To install from source, clone the git repository using::
+To install from github, clone the git repository using::
 
     $ git clone https://github.com/pbugnion/contactpp.git
 
 Navigate to the source's root directory (``contactpp``) and run::
 
     $ python setup.py install
+
+If you have a *.zip or a *tar.gz archive of the source, unpack the compressed archive into a directory, navigate to this directory and run:
+
+    $ python setup.py install
+
+You may need to run this as root, unless you are running in a virtual environment.
 
 
 
@@ -80,12 +90,12 @@ def write_readme():
     Create README file from LONG_DESCRIPTION, replacing non-standard
     bits of re-structured text.
     """
-    with open("README.rst","w") as f:
+    with codecs.open("README.rst","w",encoding="utf-8") as f:
         f.write("""\
 .. Automatically generated from LONG_DESCRIPTION keyword in 
 .. setup.py. Do not edit directly.\
 """)
-        f.write(LONG_DESCRIPTION.replace(".. code:: python","::"))
+        f.write(LONG_DESCRIPTION)
 
 import contactpp
 
