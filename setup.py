@@ -10,7 +10,7 @@ MAINTAINER_EMAIL = "pascal@bugnion.org"
 URL = "https://pypi.python.org/pypi/contactpp"
 LICENSE = "new BSD"
 
-LONG_DESCRIPTION = """
+LONG_DESCRIPTION = u"""
 
 contactpp
 =========

@@ -8,7 +8,7 @@ contactpp is a package for the generation of pseudopotentials for the
 contact interaction. The theory is outlined in [BLNC]_. 
 
 
-.. [BLNC] P.O. Bugnion, P. L\u00F3pez R\u00EDos, R.J. Needs, and G.J. Conduit, 
+.. [BLNC] P.O. Bugnion, P. López Ríos, R.J. Needs, and G.J. Conduit, 
          High-fidelity pseudopotentials for the contact interaction.
 
 Links
