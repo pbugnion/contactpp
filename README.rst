@@ -5,10 +5,10 @@ contactpp
 =========
 
 contactpp is a package for the generation of pseudopotentials for the 
-contact interaction. The theory is outlined in [BNC]_. 
+contact interaction. The theory is outlined in [BLNC]_. 
 
 
-.. [BLNC] P.O. Bugnion, P. López Ríos, R.J. Needs, and G.J. Conduit, 
+.. [BLNC] P.O. Bugnion, P. L\u00F3pez R\u00EDos, R.J. Needs, and G.J. Conduit, 
          High-fidelity pseudopotentials for the contact interaction.
 
 Links
@@ -46,7 +46,7 @@ Navigate to the source's root directory (``contactpp``) and run::
 
     $ python setup.py install
 
-If you have a *.zip or a *tar.gz archive of the source, unpack the compressed archive into a directory, navigate to this directory and run:
+If you have a zip or a tar.gz archive of the source, unpack the compressed archive into a directory, navigate to this directory and run::
 
     $ python setup.py install
 
@@ -57,6 +57,6 @@ You may need to run this as root, unless you are running in a virtual environmen
 Issue reporting and contributing
 --------------------------------
 
-Report issues using the `github issue tracker <https://github.com/scikit-monaco/scikit-monaco/issues>`_.
+Report issues using the `github issue tracker <https://github.com/pbugnion/contactpp/issues>`_.
 
 Read the CONTRIBUTING guide to learn how to contribute.
