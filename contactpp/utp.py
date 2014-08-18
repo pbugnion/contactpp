@@ -231,9 +231,12 @@ def make_utp_potential(scattering_length, fermi_energy, cutoff=None,
         ``max(|delta_PP(k) - delta_true(k)|)``. "rms" by default.
 
     dos : function, dos(k) -> density of states, optional
-        The cost function that is optimized when constructing the potential
-        is ``int_0^kF { [delta_PP(k) - delta_true(k)]^2 dos(k) dk``. By default,
-        ``dos(k) = lambda k: k**2``. Must accept a numpy array as input.
+        When using the RMS objective function, this argument sets the cost function 
+        that is optimized when constructing the potential. The objective function is:
+        ``int_0^kF { [delta_PP(k) - delta_true(k)]^2 dos(k) dk``. 
+        By default, ``dos(k) = lambda k: k**2``. Must accept a numpy array (of k-values)
+        as input. If the objective_function is not RMS, specifying this argument raises
+        a ValueError.
 
     verbose : boolean, optional
         Display convergence information. True by default.
