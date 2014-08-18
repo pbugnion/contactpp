@@ -13,6 +13,7 @@ contactpp: pseudopotentials for the contact interaction
    introduction
    usage
    citing
+   notes
 
 
 
