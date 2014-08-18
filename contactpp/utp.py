@@ -28,7 +28,8 @@ class UTPPotential(object):
 class UTPGenerator(object):
 
     def __init__(self,a,kf,c=None,init_coeffs=None,
-            integrator="vode",npoints=1000,nks=10,dos=None,verbose=True):
+            integrator="vode",npoints=1000,nks=10,objective_function="rms",dos=None,
+            verbose=True):
         self.a = a
         self.kf = float(kf)
         self.Ef = self.kf**2
@@ -48,7 +49,22 @@ class UTPGenerator(object):
                     self._get_init_coeffs_from_troullier()
         self.integrator = integrator
         self.npoints = npoints
-        self.dos = dos if dos is not None else lambda k: k**2
+        self.objective_function = objective_function
+        if self.objective_function not in ("rms", "max") : 
+            raise ValueError(
+                    "objective_function argument should be either 'rms'\
+                    or 'max'.")
+        if self.objective_function == "max" and dos is not None:
+            raise ValueError(
+                    "Cannot specify DOS when objective function is 'max'. "\
+                    "Specifying a DOS is only valid when the objective "\
+                    "function is 'rms'.")
+        if self.objective_function == "rms" :
+            self.dos = dos if dos is not None else lambda k: k**2
+        self.OBJECTIVE_FUNCTIONS = {
+                "rms" : self._calc_rms_error,
+                "max" : self._calc_max_error
+        }
         self.ks = np.linspace(0.,kf,nks)
         self.verbose = bool(verbose)
 
@@ -83,12 +99,30 @@ class UTPGenerator(object):
     def _calc_true_tandelta(self,k):
         return -k*self.a
 
-    def _calc_average_error(self,V):
+    def _calc_tandelta_error(self,V):
         tandeltas = np.array([ self._calc_tandelta(V,k) for k in self.ks ])
         true_tandeltas = np.array([ self._calc_true_tandelta(k)
             for k in self.ks ])
+        return true_tandeltas - tandeltas
+
+    def _calc_rms_error(self,V):
+        """
+        Objective function.
+
+        RMS error over all k values, weighted by a density of states.
+        """
+        tandelta_errors = self._calc_tandelta_error(V)
         return np.sqrt(sum(
-            (true_tandeltas-tandeltas)**2 * self.dos(self.ks)))/len(self.ks)
+            (tandelta_errors)**2 * self.dos(self.ks)))/len(self.ks)
+
+    def _calc_max_error(self,V):
+        """
+        Objective function.
+
+        Maximal (L-infinity norm) error over all k-values.
+        """
+        tandelta_errors = self._calc_tandelta_error(V)
+        return max(abs(tandelta_errors))
 
     def _coeffs2poly(self,coeffs):
         poly_coeffs = np.zeros((len(self.init_coeffs)+2,))
@@ -108,9 +142,10 @@ class UTPGenerator(object):
         return lambda r: np.where(r<self.c,p(r/self.c),0.)
 
     def _make_objective_func(self):
+        f = self.OBJECTIVE_FUNCTIONS[self.objective_function]
         def objective(coeffs):
             V = self._make_pseudo(coeffs)
-            error = self._calc_average_error(V)
+            error = f(V)
             return error
         return objective
 
@@ -120,9 +155,9 @@ class UTPGenerator(object):
             def callback(coeffs):
                 if (self.niter % 10 == 0):
                     V = self._make_pseudo(coeffs)
-                    error = self._calc_average_error(V)
-                    print "# iterations: {:<4d} | Error: {}".format(
-                            self.niter,error)
+                    error = self.OBJECTIVE_FUNCTIONS[self.objective_function](V)
+                    print "# iterations: {:<4d} | {} error: {}".format(
+                            self.niter,self.objective_function, error)
                 self.niter += 1
         else:
             callback = None
@@ -142,8 +177,8 @@ class UTPGenerator(object):
 
 
 def make_utp_potential(scattering_length, fermi_energy, cutoff=None, 
-        init_coeffs=None,integrator="vode",npoints=1000,nks=10,dos=None,
-        verbose=True):
+        init_coeffs=None,integrator="vode",npoints=1000,nks=10,objective_function="rms",
+        dos=None,verbose=True):
     """
     Create a UTPPotential object.
 
@@ -189,6 +224,12 @@ def make_utp_potential(scattering_length, fermi_energy, cutoff=None,
         Number of k-points to use when integrating the error in phase shifts.
         Increasing this may lead to somewhat better results. 10 by default.
 
+    objective_function : string, optional
+        Type of objective function to minimize: either "rms" to minimize 
+        ``int_0^kF { [delta_PP(k) - delta_true(k)]^2 dos(k) dk``, where dos
+        is another optional argument, or "max" to minimize 
+        ``max(|delta_PP(k) - delta_true(k)|)``. "rms" by default.
+
     dos : function, dos(k) -> density of states, optional
         The cost function that is optimized when constructing the potential
         is ``int_0^kF { [delta_PP(k) - delta_true(k)]^2 dos(k) dk``. By default,
@@ -198,5 +239,6 @@ def make_utp_potential(scattering_length, fermi_energy, cutoff=None,
         Display convergence information. True by default.
     """
     pgen = UTPGenerator(scattering_length,np.sqrt(fermi_energy),
-            cutoff,init_coeffs,integrator,npoints,nks,dos,verbose)
+            cutoff,init_coeffs,integrator,npoints,nks,objective_function,
+            dos,verbose)
     return pgen.make_pseudopotential()
