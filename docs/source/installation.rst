@@ -5,7 +5,9 @@ Installation
 Requirements
 ------------
 
-python2.7, numpy, scipy.
+python2.7, numpy, scipy. These can be installed on a Debian system using::
+
+    $ sudo apt-get install python-numpy python-scipy
 
 The easy way
 ------------
